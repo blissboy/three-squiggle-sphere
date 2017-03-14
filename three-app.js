@@ -33,6 +33,26 @@ var values = {
             },
             name: 'light3'
         }
+    ],
+    sun: {
+        size: 100,
+        color: 0x222222
+    },
+    planets: [
+        {
+            name: 'first',
+            orbitInSuns: 8,
+            color: 0x28dc52,
+            orbitPeriod: 32,
+            size: 35
+        },
+        {
+            name: 'second',
+            orbitInSuns: 4,
+            color: 0x2828dc,
+            orbitPeriod: 88,
+            size: 49
+        }
     ]
 };
 
@@ -59,11 +79,21 @@ function init() {
 
 function createGUI() {
     var gui = new dat.GUI();
-    gui.addColor(values, 'squareColor').onChange(() => {
-        let box = scene.getObjectByName('myBox');
-        if (box) {
-            box.material.color.set(values.squareColor);
+    gui.addColor(values.sun, 'color').onChange(() => {
+        let sun = scene.getObjectByName('sun');
+        if (sun) {
+            sun.material.color.set(values.sun.color);
         }
+    });
+
+    values.planets.forEach((planet) => {
+        let planetFolder = gui.addFolder(planet.name);
+        planetFolder.addColor(planet, 'color').onChange(() => {
+            let orb = scene.getObjectByName(planet.name);
+            if (orb) {
+                orb.material.color.set(planet.color);
+            }
+        });
     });
 
     values.lights.forEach((light) => {
@@ -71,7 +101,7 @@ function createGUI() {
         folder.addColor(light, 'color').onChange(() => {
             scene.getObjectByName(light.name).color.set(light.color);
         });
-        folder.add(light, 'intensity',0,1).onChange(() => {
+        folder.add(light, 'intensity', 0, 1).onChange(() => {
             scene.getObjectByName(light.name).intensity = light.intensity;
         })
     });
@@ -91,19 +121,62 @@ function updateScene() {
 }
 
 function createGeometries() {
-    let mesh = new THREE.Mesh(
-        new THREE.BoxGeometry(10, 10, 10),
-        new THREE.MeshLambertMaterial({ color: values.squareColor })
-    );
 
-    mesh.name = 'myBox';
-    scene.add(mesh);
+    createSun();
+    createPlanets();
+
+    // let mesh = new THREE.Mesh(
+    //     new THREE.BoxGeometry(10, 10, 10),
+    //     new THREE.MeshLambertMaterial({ color: values.squareColor })
+    // );
+    // mesh.name = 'myBox';
+    // scene.add(mesh);
+}
+
+function createSun() {
+    // let mesh = new THREE.Mesh(
+    //     new THREE.SphereGeometry(values.sun.size, 64, 64),
+    //     new THREE.MeshPhongMaterial({ color: values.sun.color })
+    // );
+    // mesh.name = 'sun';
+    // scene.add(mesh);
+
+    // lighting of sun
+    let sunGeometry = new THREE.SphereGeometry(values.sun.size, 64, 64);
+    let sunLight = new THREE.PointLight(0xffee88, 1, 100, 1);
+    let sunMat = new THREE.MeshStandardMaterial({
+        emissive: 0xffffee,
+        emissiveIntensity: 1,
+        color: 0xffee88
+    });
+    let mesh = new THREE.Mesh(sunGeometry, sunMat);
+    mesh.name = 'sun';
+    sunLight.add(mesh);
+    //sunLight.position.set(0, 2, 0);
+    sunLight.castShadow = true;
+    scene.add(sunLight);
+
+}
+function createPlanets() {
+    let i = 1;
+    values.planets.forEach((planet) => {
+        let orb = new THREE.SphereGeometry(planet.size, 64, 64);
+        //orb.translate(planet.orbitInSuns * i++);
+        orb.translate(planet.orbitInSuns * values.sun.size,0,0);
+        let mesh = new THREE.Mesh(
+            orb,
+            new THREE.MeshPhongMaterial({ color: planet.color })
+        );
+        mesh.name = planet.name;
+        scene.add(mesh);
+    });
+
 }
 
 function updateGeometries() {
     scene.children.forEach(c => {
-        c.rotation.x += .05;
-        c.rotation.y += .1;
+        c.rotation.x += .005;
+        c.rotation.y += .001;
     });
 }
 
@@ -127,6 +200,7 @@ function updateLighting() {
 }
 
 function setupCamera() {
+    //camera.position.z = values.sun.size * 4;
     camera.position.z = 100;
 }
 
