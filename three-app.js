@@ -34,6 +34,17 @@ var values = {
             name: 'light3'
         }
     ],
+    ambientLight: {
+        intensity: 0.99,
+        color: 0xffffff,
+        position: {
+            x: 0,
+            y: 0,
+            z: 400
+        },
+        name: 'ambientLight'
+    },
+
     sun: {
         size: 100,
         color: 0x222222
@@ -106,6 +117,14 @@ function createGUI() {
         })
     });
 
+    let folder = gui.addFolder('ambient');
+    folder.addColor(values.ambientLight, 'color').onChange(() => {
+        scene.getObjectByName('ambientLight').color.set(values.ambientLight.color);
+    });
+    folder.add(values.ambientLight, 'intensity', 0, 1).onChange(() => {
+        scene.getObjectByName('ambientLight').intensity = values.ambientLight.intensity;
+    })
+
 }
 
 function createScene() {
@@ -143,11 +162,11 @@ function createSun() {
 
     // lighting of sun
     let sunGeometry = new THREE.SphereGeometry(values.sun.size, 64, 64);
-    let sunLight = new THREE.PointLight(0xffee88, 1, 100, 1);
+    let sunLight = new THREE.PointLight(0xffee88, 1, 0, .000001);
     let sunMat = new THREE.MeshStandardMaterial({
-        emissive: 0xffffee,
+        emissive: 0xff0000,
         emissiveIntensity: 1,
-        color: 0xffee88
+        color: 0x0000ff
     });
     let mesh = new THREE.Mesh(sunGeometry, sunMat);
     mesh.name = 'sun';
@@ -162,7 +181,7 @@ function createPlanets() {
     values.planets.forEach((planet) => {
         let orb = new THREE.SphereGeometry(planet.size, 64, 64);
         //orb.translate(planet.orbitInSuns * i++);
-        orb.translate(planet.orbitInSuns * values.sun.size,0,0);
+        orb.translate(planet.orbitInSuns * values.sun.size, 0, 0);
         let mesh = new THREE.Mesh(
             orb,
             new THREE.MeshPhongMaterial({ color: planet.color })
@@ -174,10 +193,10 @@ function createPlanets() {
 }
 
 function updateGeometries() {
-    scene.children.forEach(c => {
-        c.rotation.x += .005;
-        c.rotation.y += .001;
-    });
+    // scene.children.forEach(c => {
+    //     c.rotation.x += .005;
+    //     c.rotation.y += .001;
+    // });
 }
 
 
@@ -192,7 +211,9 @@ function setupLighting() {
     });
 
     scene.add(lights);
-    scene.add(new THREE.AmbientLight(0xff9999, 0.7));
+    let ambient = new THREE.AmbientLight(values.ambientLight.color, values.ambientLight.intensity);
+    ambient.name = 'ambientLight';
+    scene.add(ambient);
 }
 
 function updateLighting() {
