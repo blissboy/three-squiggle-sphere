@@ -1,0 +1,23 @@
+{
+  "name": "three-squiggle-sphere",
+  "version": "1.0.0",
+  "description": "",
+  "main": "three-app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blissboy/three-squiggle-sphere.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/blissboy/three-squiggle-sphere/issues"
+  },
+  "homepage": "https://github.com/blissboy/three-squiggle-sphere#readme",
+  "dependencies": {
+    "dat.gui": "^0.6.1"
+  }
+}

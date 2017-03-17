@@ -47,7 +47,7 @@ var values = {
 
     sun: {
         size: 100,
-        color: 0x222222
+        color: 0x22dd22
     },
     planets: [
         {
@@ -170,9 +170,9 @@ function createSun() {
 
     // lighting of sun
     let sunGeometry = new THREE.SphereGeometry(values.sun.size, 64, 64);
-    let sunLight = new THREE.PointLight(0xffee88, 1, 0, .000001);
+    let sunLight = new THREE.PointLight(0x33ee88, 1, 0, .000001);
     let sunMat = new THREE.MeshStandardMaterial({
-        emissive: 0xff0000,
+        emissive: 0x66aa00,
         emissiveIntensity: 1,
         color: 0x0000ff
     });
