@@ -217,15 +217,14 @@ function createEarth() {
     let normalMap = THREE.ImageUtils.loadTexture("./images/earth_normal_2048.jpg");
     let specularMap = THREE.ImageUtils.loadTexture("./images/earth_specular_2048.jpg");
 
-    let shader = THREE.ShaderUtils.lib["normal"];
+    let shader = THREE.ShaderLib["normal"];
     let uniforms = THREE.UniformsUtils.clone(shader.uniforms);
+    uniforms.normalMap.value = normalMap;
+    uniforms.diffuse.value = surfaceMap;
+    uniforms.specularMap.value = specularMap;
 
-    uniforms["tNormal"].texture = normalMap;
-    uniforms["tDiffuse"].texture = surfaceMap;
-    uniforms["tSpecular"].texture = specularMap;
-
-    uniforms["enableDiffuse"].value = true;
-    uniforms["enableSpecular"].value = true;
+    uniforms.enableDiffuse = true;
+    uniforms.enableSpecular = true;
 
     let shaderMaterial = new THREE.ShaderMaterial({
         fragmentShader: shader.fragmentShader,
@@ -234,40 +233,63 @@ function createEarth() {
         lights: true
     });
 
-    let globeGeometry = new THREE.SphereGeometry(1, 32, 32);
+    let testMaterial = new THREE.MeshBasicMaterial({ map: surfaceMap });
+
+
+    let globeGeometry = new THREE.SphereGeometry(40, 32, 32);
+    globeGeometry.translate(3 * values.sun.size, 0, 0);
+
 
     // We'll need these tangents for our shader
     globeGeometry.computeTangents();
-    let globeMesh = new THREE.Mesh( globeGeometry, shaderMaterial );
+    let globeMesh = new THREE.Mesh(globeGeometry, shaderMaterial);
+    //let globeMesh = new THREE.Mesh(globeGeometry, testMaterial);
 
     // Let's work in the tilt
     globeMesh.rotation.z = Earth.TILT;
 
+    addClouds(globeMesh);
     // Add it to our group
     earthGroup.add(globeMesh);
-
+    scene.add(earthGroup);
     // Save it away so we can rotate it
     this.globeMesh = globeMesh;
 
+    // // Create our Earth with nice texture
+    // // todo: make this config
+    // let earthmap = "./images/earth_surface_2048.jpg";
+    // let geometry = new THREE.SphereGeometry(40, 32, 32);
+    // geometry.translate(3 * values.sun.size, 0, 0);
 
+    // let texture = THREE.ImageUtils.loadTexture(earthmap);
+    // let material = new THREE.MeshBasicMaterial({ map: texture });
+    // let earthMesh = new THREE.Mesh(geometry, material);
+    // earthMesh.scale = new THREE.Vector3(40, 40, 40);
+    // // Let's work in the tilt
+    // // todo: make this config
+    // earthMesh.rotation.z = 0.41;
 
-    // Create our Earth with nice texture
-    // todo: make this config
-    let earthmap = "./images/earth_surface_2048.jpg";
-    let geometry = new THREE.SphereGeometry(40, 32, 32);
-    geometry.translate(3 * values.sun.size, 0, 0);
-
-    let texture = THREE.ImageUtils.loadTexture(earthmap);
-    let material = new THREE.MeshBasicMaterial({ map: texture });
-    let earthMesh = new THREE.Mesh(geometry, material);
-    earthMesh.scale = new THREE.Vector3(40, 40, 40);
-    // Let's work in the tilt
-    // todo: make this config
-    earthMesh.rotation.z = 0.41;
-
-    scene.add(earthMesh);
+    // scene.add(earthMesh);
 
 }
+
+function addClouds(planet) {
+    // Create our clouds
+    var cloudsMap = THREE.ImageUtils.loadTexture("./images/earth_clouds_1024.png");
+    var cloudsMaterial = new THREE.MeshLambertMaterial({
+        color: 0xffffff,
+        map: cloudsMap,
+        transparent: true
+    });
+
+    var cloudsGeometry = new THREE.SphereGeometry(Earth.CLOUDS_SCALE, 32, 32);
+    cloudsMesh = new THREE.Mesh(cloudsGeometry, cloudsMaterial);
+    cloudsMesh.rotation.z = Earth.TILT;
+
+    // Add it to our group
+    planet.add(cloudsMesh);
+}
+
 
 
 function updateGeometries() {
@@ -299,7 +321,10 @@ function updateLighting() {
 }
 
 function setupCamera() {
-    camera.position.z = 700;
+    camera.position.x = 341;
+    camera.position.y = 160
+    camera.position.z = -20;
+    camera.focalLength = 21.65;
 }
 
 function updateCamera() {

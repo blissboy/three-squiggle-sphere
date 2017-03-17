@@ -1,14 +1,15 @@
 // Custom Earth class
 Earth = function () {
-    //Sim.Object.call(this);
 }
 
-Earth.prototype = {};//new Sim.Object();
+Earth.prototype = {};
 
 /**
  * 
  */
 Earth.prototype.init = function (scene, param) {
+    this.scene = scene;
+    
     param = param || {};
 
     this.animateOrbit = param.animateOrbit || false;
@@ -154,7 +155,7 @@ Earth.prototype.createMoonOrbit = function (distance, size) {
 Earth.prototype.update = function () {
     // Simulate the orbit
     if (this.animateOrbit) {
-        this.object3D.rotation.y += this.revolutionSpeed;
+        this.earthGroup.rotation.y += this.revolutionSpeed;
     }
 
     if (this.animateRotation) {
@@ -166,8 +167,6 @@ Earth.prototype.update = function () {
             this.cloudsMesh.rotation.y += this.cloudsRotationSpeed;
         }
     }
-
-    Sim.Object.prototype.update.call(this);
 }
 
 
@@ -179,42 +178,40 @@ Earth.CLOUDS_ROTATION_FACTOR = 0.95;
 
 // Custom Moon class
 Moon = function () {
-    Sim.Object.call(this);
+    
 }
 
-Moon.prototype = new Sim.Object();
+Moon.prototype = {};
 
 Moon.prototype.init = function (param) {
     param = param || {};
 
     this.rotationSpeed = param.rotationSpeed || Moon.ROTATION_SPEED;
-    var size = param.size || 1;
+    let size = param.size || 1;
 
     // Create a group to contain the Moon and orbit
-    var moonGroup = new THREE.Object3D();
+    let moonGroup = new THREE.Object3D();
 
-    var MOONMAP = "../images/moon_1024.jpg";
-    var geometry = new THREE.SphereGeometry(Moon.SIZE_IN_EARTHS * size, 32, 32);
-    var texture = THREE.ImageUtils.loadTexture(MOONMAP);
-    var material = new THREE.MeshPhongMaterial({
+    let MOONMAP = "../images/moon_1024.jpg";
+    let geometry = new THREE.SphereGeometry(Moon.SIZE_IN_EARTHS * size, 32, 32);
+    let texture = THREE.ImageUtils.loadTexture(MOONMAP);
+    let material = new THREE.MeshPhongMaterial({
         map: texture,
         ambient: 0x888888
     });
-    var mesh = new THREE.Mesh(geometry, material);
-    var distance = Moon.DISTANCE_FROM_EARTH / Earth.RADIUS / size;
-    var distsquared = distance * distance;
+    let mesh = new THREE.Mesh(geometry, material);
+    let distance = Moon.DISTANCE_FROM_EARTH / Earth.RADIUS / size;
+    let distsquared = distance * distance;
     mesh.position.set(Math.sqrt(distsquared / 2), 0, -Math.sqrt(distsquared / 2));
     moonGroup.add(mesh);
 
     // Tell the framework about our object
-    this.setObject3D(moonGroup);
+    this.moonGroup = moonGroup;
 }
 
 Moon.prototype.update = function () {
     // Moon orbit
-    this.object3D.rotation.y += this.rotationSpeed;
-
-    Sim.Object.prototype.update.call(this);
+    this.moonGroup.rotation.y += this.rotationSpeed;
 }
 
 Moon.DISTANCE_FROM_EARTH = 356400;
