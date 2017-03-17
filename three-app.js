@@ -141,6 +141,14 @@ function updateScene() {
 
 function createGeometries() {
 
+    // let mesh = new THREE.Mesh(
+    //     new THREE.BoxGeometry(10, 10, 10),
+    //     new THREE.MeshLambertMaterial({ color: values.squareColor })
+    // );
+
+    // mesh.name = 'myBox';
+    // scene.add(mesh);
+
     createSun();
     createPlanets();
 
@@ -174,23 +182,47 @@ function createSun() {
     //sunLight.position.set(0, 2, 0);
     sunLight.castShadow = true;
     scene.add(sunLight);
-
 }
+
+
 function createPlanets() {
-    let i = 1;
-    values.planets.forEach((planet) => {
-        let orb = new THREE.SphereGeometry(planet.size, 64, 64);
-        //orb.translate(planet.orbitInSuns * i++);
-        orb.translate(planet.orbitInSuns * values.sun.size, 0, 0);
-        let mesh = new THREE.Mesh(
-            orb,
-            new THREE.MeshPhongMaterial({ color: planet.color })
-        );
-        mesh.name = planet.name;
-        scene.add(mesh);
-    });
+    // let i = 1;
+    // values.planets.forEach((planet) => {
+    //     let orb = new THREE.SphereGeometry(planet.size, 64, 64);
+    //     //orb.translate(planet.orbitInSuns * i++);
+    //     orb.translate(planet.orbitInSuns * values.sun.size, 0, 0);
+    //     let mesh = new THREE.Mesh(
+    //         orb,
+    //         new THREE.MeshPhongMaterial({ color: planet.color })
+    //     );
+    //     mesh.name = planet.name;
+    //     scene.add(mesh);
+    // });
+
+    createEarth();
 
 }
+
+function createEarth() {
+    // Create our Earth with nice texture
+    let earthmap = "./images/earth_surface_2048.jpg";
+    let geometry = new THREE.SphereGeometry(40, 32, 32);
+    // todo: make this config
+    geometry.translate(3 * values.sun.size, 0, 0);
+    
+    let texture = THREE.ImageUtils.loadTexture(earthmap);
+    let material = new THREE.MeshBasicMaterial({ map: texture });
+    //let material = new THREE.MeshPhongMaterial({color: 0x999999});
+    let earthMesh = new THREE.Mesh(geometry, material);
+    earthMesh.scale = new THREE.Vector3(40,40,40);
+    // Let's work in the tilt
+    // todo: make this config
+    earthMesh.rotation.z = 0.41;
+
+    scene.add(earthMesh);
+
+}
+
 
 function updateGeometries() {
     // scene.children.forEach(c => {
@@ -221,8 +253,7 @@ function updateLighting() {
 }
 
 function setupCamera() {
-    //camera.position.z = values.sun.size * 4;
-    camera.position.z = 100;
+    camera.position.z = 700;
 }
 
 function updateCamera() {
