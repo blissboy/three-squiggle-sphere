@@ -204,17 +204,63 @@ function createPlanets() {
 }
 
 function createEarth() {
+
+
+
+
+
+
+    // Create a group to contain Earth and Clouds
+    let earthGroup = new THREE.Object3D();
+
+    let surfaceMap = THREE.ImageUtils.loadTexture("./images/earth_surface_2048.jpg");
+    let normalMap = THREE.ImageUtils.loadTexture("./images/earth_normal_2048.jpg");
+    let specularMap = THREE.ImageUtils.loadTexture("./images/earth_specular_2048.jpg");
+
+    let shader = THREE.ShaderUtils.lib["normal"];
+    let uniforms = THREE.UniformsUtils.clone(shader.uniforms);
+
+    uniforms["tNormal"].texture = normalMap;
+    uniforms["tDiffuse"].texture = surfaceMap;
+    uniforms["tSpecular"].texture = specularMap;
+
+    uniforms["enableDiffuse"].value = true;
+    uniforms["enableSpecular"].value = true;
+
+    let shaderMaterial = new THREE.ShaderMaterial({
+        fragmentShader: shader.fragmentShader,
+        vertexShader: shader.vertexShader,
+        uniforms: uniforms,
+        lights: true
+    });
+
+    let globeGeometry = new THREE.SphereGeometry(1, 32, 32);
+
+    // We'll need these tangents for our shader
+    globeGeometry.computeTangents();
+    let globeMesh = new THREE.Mesh( globeGeometry, shaderMaterial );
+
+    // Let's work in the tilt
+    globeMesh.rotation.z = Earth.TILT;
+
+    // Add it to our group
+    earthGroup.add(globeMesh);
+
+    // Save it away so we can rotate it
+    this.globeMesh = globeMesh;
+
+
+
     // Create our Earth with nice texture
+    // todo: make this config
     let earthmap = "./images/earth_surface_2048.jpg";
     let geometry = new THREE.SphereGeometry(40, 32, 32);
-    // todo: make this config
     geometry.translate(3 * values.sun.size, 0, 0);
-    
+
     let texture = THREE.ImageUtils.loadTexture(earthmap);
     let material = new THREE.MeshBasicMaterial({ map: texture });
-    //let material = new THREE.MeshPhongMaterial({color: 0x999999});
     let earthMesh = new THREE.Mesh(geometry, material);
-    earthMesh.scale = new THREE.Vector3(40,40,40);
+    earthMesh.scale = new THREE.Vector3(40, 40, 40);
     // Let's work in the tilt
     // todo: make this config
     earthMesh.rotation.z = 0.41;
