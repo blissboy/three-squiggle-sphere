@@ -76,9 +76,11 @@ var render = function () {
 function init() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer = new THREE.WebGLRenderer({antialias: true});
     cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
-    cameraControls.addEventListener('change', function () { renderer.render(scene, camera); });
+    cameraControls.addEventListener('change', function () {
+        renderer.render(scene, camera);
+    });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x000000, 1);
@@ -204,92 +206,52 @@ function createPlanets() {
 }
 
 function createEarth() {
-
-
-
-
-
-
     // Create a group to contain Earth and Clouds
     let earthGroup = new THREE.Object3D();
 
-    let surfaceMap = THREE.ImageUtils.loadTexture("./images/earth_surface_2048.jpg");
-    let normalMap = THREE.ImageUtils.loadTexture("./images/earth_normal_2048.jpg");
-    let specularMap = THREE.ImageUtils.loadTexture("./images/earth_specular_2048.jpg");
+    let loader = new THREE.TextureLoader();
+    let surfaceMap = loader.load("./images/earth_surface_2048.jpg");
+    let normalMap = loader.load("./images/earth_normal_2048.jpg");
+    let specularMap = loader.load("./images/earth_specular_2048.jpg");
 
-    let shader = THREE.ShaderLib["normal"];
-    let uniforms = THREE.UniformsUtils.clone(shader.uniforms);
-    uniforms.normalMap.value = normalMap;
-    uniforms.diffuse.value = surfaceMap;
-    uniforms.specularMap.value = specularMap;
-
-    uniforms.enableDiffuse = true;
-    uniforms.enableSpecular = true;
-
-    let shaderMaterial = new THREE.ShaderMaterial({
-        fragmentShader: shader.fragmentShader,
-        vertexShader: shader.vertexShader,
-        uniforms: uniforms,
-        lights: true
-    });
-
-    let testMaterial = new THREE.MeshBasicMaterial({ map: surfaceMap });
-
+    let material = new THREE.MeshPhongMaterial({
+        map: surfaceMap,
+        normalMap: normalMap,
+        specularMap: specularMap});
 
     let globeGeometry = new THREE.SphereGeometry(40, 32, 32);
-    globeGeometry.translate(3 * values.sun.size, 0, 0);
+    let globeMesh = new THREE.Mesh(globeGeometry, material);
 
+    addClouds(globeMesh, globeGeometry);
 
-    // We'll need these tangents for our shader
-    globeGeometry.computeTangents();
-    let globeMesh = new THREE.Mesh(globeGeometry, shaderMaterial);
-    //let globeMesh = new THREE.Mesh(globeGeometry, testMaterial);
-
+    globeMesh.translateX(3 * values.sun.size, 0, 0);
     // Let's work in the tilt
     globeMesh.rotation.z = Earth.TILT;
 
-    addClouds(globeMesh);
     // Add it to our group
     earthGroup.add(globeMesh);
     scene.add(earthGroup);
     // Save it away so we can rotate it
     this.globeMesh = globeMesh;
 
-    // // Create our Earth with nice texture
-    // // todo: make this config
-    // let earthmap = "./images/earth_surface_2048.jpg";
-    // let geometry = new THREE.SphereGeometry(40, 32, 32);
-    // geometry.translate(3 * values.sun.size, 0, 0);
-
-    // let texture = THREE.ImageUtils.loadTexture(earthmap);
-    // let material = new THREE.MeshBasicMaterial({ map: texture });
-    // let earthMesh = new THREE.Mesh(geometry, material);
-    // earthMesh.scale = new THREE.Vector3(40, 40, 40);
-    // // Let's work in the tilt
-    // // todo: make this config
-    // earthMesh.rotation.z = 0.41;
-
-    // scene.add(earthMesh);
-
 }
 
-function addClouds(planet) {
-    // Create our clouds
-    var cloudsMap = THREE.ImageUtils.loadTexture("./images/earth_clouds_1024.png");
-    var cloudsMaterial = new THREE.MeshLambertMaterial({
-        color: 0xffffff,
-        map: cloudsMap,
-        transparent: true
-    });
+function addClouds(planetMesh, planetGeometry) {
 
-    var cloudsGeometry = new THREE.SphereGeometry(Earth.CLOUDS_SCALE, 32, 32);
+    // TODO: parameterize / config all these
+    let loader = new THREE.TextureLoader();
+    let cloudsMap = loader.load("./images/earth_clouds_1024.png");
+
+    let cloudsMaterial = new THREE.MeshPhongMaterial({
+        map: cloudsMap,
+        transparent: true});
+
+    let cloudsGeometry = new THREE.SphereGeometry(planetGeometry.parameters.radius * 1.005, 32, 32);
     cloudsMesh = new THREE.Mesh(cloudsGeometry, cloudsMaterial);
-    cloudsMesh.rotation.z = Earth.TILT;
 
     // Add it to our group
-    planet.add(cloudsMesh);
+    planetMesh.add(cloudsMesh);
 }
-
 
 
 function updateGeometries() {
