@@ -253,9 +253,30 @@ function addClouds(planetMesh, planetGeometry) {
     planetMesh.add(cloudsMesh);
 }
 
+function addMoon(planetMesh, planetGeometry) {
+
+    // TODO: parameterize / config all these
+    let loader = new THREE.TextureLoader();
+    let moonMap = loader.load("./images/moon_1024.png");
+
+    let moonMaterial = new THREE.MeshPhongMaterial({
+        map: cloudsMap,
+        transparent: true});
+
+    let moonGeometry = new THREE.SphereGeometry(planetGeometry.parameters.radius * 1.2, 32, 32);
+    cloudsMesh = new THREE.Mesh(moonGeometry, moonMaterial);
+
+    // Add it to our group
+    planetMesh.add(cloudsMesh);
+}
+
+
 
 function updateGeometries() {
-    // scene.children.forEach(c => {
+    this.globeMesh.rotation.y += .01;
+    // this.globeMesh.rotateX += .1;
+    // this.globeMesh.rotateY += .1;
+        // scene.children.forEach(c => {
     //     c.rotation.x += .005;
     //     c.rotation.y += .001;
     // });
